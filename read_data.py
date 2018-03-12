@@ -14,13 +14,13 @@ def get_imgs(img_list):
         
 
 def read_data():
-    train_x_pistol = get_imgs(glob.glob("Train/Pistol/*.jpg"))
-    train_x_phone = get_imgs(glob.glob("Train/Smartphone/*.jpg"))
+    train_x_pistol = get_imgs(glob.glob("Train/Pistol/*"))
+    train_x_phone = get_imgs(glob.glob("Train/Smartphone/*"))
 
     train_x = np.concatenate((train_x_pistol, train_x_phone), axis = 0)
     train_y = np.concatenate((np.zeros(train_x_pistol.shape[0]), np.ones(train_x_phone.shape[0])))
     
-    test_x = get_imgs(glob.glob("Test/*.jpg"))
+    test_x = get_imgs(glob.glob("Test/*"))
 
     return (train_x, train_y, test_x)
 
