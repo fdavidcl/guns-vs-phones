@@ -1,8 +1,13 @@
 #!/usr/bin/env python
+import numpy as np
+np.random.seed(1234) # for reproducibility
+
+# https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
 import os
 
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ['PYTHONHASHSEED'] = '0'
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+#os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 from keras.layers import Conv2D, MaxPooling2D, Dense, Reshape, Flatten, Input, Dropout, GlobalAveragePooling2D
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
@@ -162,12 +167,12 @@ model.compile('rmsprop', "categorical_crossentropy")
 model.fit(
     x_train, y_train,
     batch_size = 8,
-    epochs = 2,
+    epochs = 4,
     shuffle = True
 )
 
-preds = model.predict(x_train)
-print(np.argmax(preds, axis = 1))
+#preds = model.predict(x_train)
+#print(np.argmax(preds, axis = 1))
 
 preds = model.predict(x_test)
 write_predictions(preds)
