@@ -15,6 +15,7 @@ from keras.optimizers import SGD
 from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
 from keras.applications.vgg16 import VGG16
+from keras.applications.inception_v3 import InceptionV3
 import numpy as np
 from read_data import read_data
 from write_predictions import write_predictions
@@ -49,6 +50,23 @@ def cnn():
     model.add(Dense(2048))
     model.add(Dense(100))
     model.add(Dense(2, activation = "softmax"))
+
+    return model
+
+def use_base_model(base_model_f):
+    base_model = base_model_f(weights = 'imagenet', include_top = False)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation = 'relu')(x)
+    x = Dropout(0.1)(x)
+    x = Dense(128, activation = 'relu')(x)
+    x = Dropout(0.1)(x)
+    x = Dense(2, activation = 'softmax')(x)
+
+    model = Model(base_model.input, outputs = x)
+
+    for layer in base_model.layers:
+        layer.trainable = False
 
     return model
 
@@ -159,7 +177,7 @@ y_train = to_categorical(y_train, num_classes = 2)
 print(x_train.shape)
 print(y_train.shape)
 
-model = vgg16()
+model = use_base_model(InceptionV3)
 
 # sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 
