@@ -16,6 +16,7 @@ from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
 from keras.applications.vgg16 import VGG16
 from keras.applications.inception_v3 import InceptionV3
+import keras.applications as ka
 import numpy as np
 from read_data import read_data
 from write_predictions import write_predictions
@@ -203,3 +204,5 @@ write_predictions(preds)
 # VGG16 + 1024 + 128 + 2 (dropout 0.2), nadam, 4 epochs, GPU, loss = 8.5050
 # VGG16 + 1024 + 128 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 8..10 epochs, GPU, loss = 0.0218
 # VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 9..10 epochs, GPU, loss = 1e-7
+# XCeption + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1602
+# InceptionResNetV2 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1539
