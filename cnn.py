@@ -96,7 +96,7 @@ def vgg16NOT():
     )
 
     return model
-    
+
 
 def __vgg16(weights_path='vgg16_weights.h5'):
     model = Sequential()
@@ -166,7 +166,7 @@ def dense():
 
 #### TRAIN
 x_train, y_train, x_test = read_data()
-        
+
 # normalize
 #x_train = x_train.astype('float32') / 255.
 #x_test = x_test.astype('float32') / 255.
@@ -177,11 +177,11 @@ y_train = to_categorical(y_train, num_classes = 2)
 print(x_train.shape)
 print(y_train.shape)
 
-model = use_base_model(InceptionV3)
+model = use_base_model(VGG16)
 
 # sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 
-model.compile('rmsprop', "categorical_crossentropy")
+model.compile('adam', "categorical_crossentropy")
 model.fit(
     x_train, y_train,
     batch_size = 8,
@@ -194,3 +194,6 @@ model.fit(
 
 preds = model.predict(x_test)
 write_predictions(preds)
+
+# InceptionV3 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.2750
+# VGG16 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.0435
