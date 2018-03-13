@@ -16,6 +16,7 @@ from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
 from keras.applications.vgg16 import VGG16
 from keras.applications.inception_v3 import InceptionV3
+import keras.applications as ka
 import numpy as np
 from read_data import read_data
 from write_predictions import write_predictions
@@ -177,11 +178,11 @@ y_train = to_categorical(y_train, num_classes = 2)
 print(x_train.shape)
 print(y_train.shape)
 
-model = use_base_model(VGG16)
+model = use_base_model(ka.InceptionResNetV2)
 
 # sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 
-model.compile('adam', "categorical_crossentropy")
+model.compile('Nadam', "categorical_crossentropy")
 model.fit(
     x_train, y_train,
     batch_size = 8,
@@ -197,3 +198,5 @@ write_predictions(preds)
 
 # InceptionV3 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.2750
 # VGG16 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.0435
+# XCeption + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1602
+# InceptionResNetV2 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1539
