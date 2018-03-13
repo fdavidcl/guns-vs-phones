@@ -11,7 +11,7 @@ os.environ['PYTHONHASHSEED'] = '0'
 
 from keras.layers import Conv2D, MaxPooling2D, Dense, Reshape, Flatten, Input, Dropout, GlobalAveragePooling2D
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
-from keras.optimizers import SGD
+from keras.optimizers import SGD, RMSprop
 from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
 from keras.applications.vgg16 import VGG16
@@ -57,10 +57,10 @@ def use_base_model(base_model_f):
     base_model = base_model_f(weights = 'imagenet', include_top = False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation = 'relu')(x)
-    x = Dropout(0.1)(x)
-    x = Dense(128, activation = 'relu')(x)
-    x = Dropout(0.1)(x)
+    x = Dense(512, activation = 'relu')(x)
+    x = Dropout(0.2)(x)
+    x = Dense(64, activation = 'relu')(x)
+    x = Dropout(0.2)(x)
     x = Dense(2, activation = 'softmax')(x)
 
     model = Model(base_model.input, outputs = x)
@@ -179,13 +179,14 @@ print(y_train.shape)
 
 model = use_base_model(VGG16)
 
-# sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+rms = RMSprop(lr=0.002, rho=0.9, epsilon=None, decay=0.001)
 
-model.compile('adam', "categorical_crossentropy")
+model.compile(rms, "categorical_crossentropy")
 model.fit(
     x_train, y_train,
-    batch_size = 8,
-    epochs = 4,
+    batch_size = 16,
+    epochs = 10,
     shuffle = True
 )
 
@@ -197,3 +198,8 @@ write_predictions(preds)
 
 # InceptionV3 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.2750
 # VGG16 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.0435
+# VGG16 + 1024 + 128 + 2 (dropout 0.5), rmsprop, 4 epochs, GPU, loss = 0.1407
+# VGG16 + 1024 + 128 + 2 (dropout 0.2), rmsprop, 4 epochs, GPU, loss = 0.0436
+# VGG16 + 1024 + 128 + 2 (dropout 0.2), nadam, 4 epochs, GPU, loss = 8.5050
+# VGG16 + 1024 + 128 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 8..10 epochs, GPU, loss = 0.0218
+# VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 9..10 epochs, GPU, loss = 1e-7
