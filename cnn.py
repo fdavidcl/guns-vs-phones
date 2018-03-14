@@ -73,25 +73,6 @@ def use_base_model(base_model_f):
 
     return model
 
-def autoencode_with(base_model_f):
-    base_model = base_model_f(weights = 'imagenet', include_top = False)
-    x = base_model.output
-    x = GlobalAveragePooling2D()(x)
-    x = Dense(512, activation = 'relu')(x)
-    x = Dropout(0.2)(x)
-    encoding = Dense(64, activation = 'relu')(x)
-    x = Dropout(0.2)(encoding)
-    classification = Dense(2, activation = 'softmax')(x)
-
-    model = Model(base_model.input, outputs = x)
-
-    for layer in base_model.layers:
-        layer.trainable = False
-
-    return {
-        "base": base_model }# used to predict outputs 
-
-
 def vgg16():
     base_model = VGG16(weights = 'imagenet', include_top = False)
     x = base_model.output
@@ -106,69 +87,6 @@ def vgg16():
 
     for layer in base_model.layers:
         layer.trainable = False
-
-    return model
-
-def vgg16NOT():
-    model = VGG16(
-        include_top = False,
-        weights = 'imagenet',
-        input_shape = (160, 120, 3),
-        classes = 2
-    )
-
-    return model
-
-
-def __vgg16(weights_path='vgg16_weights.h5'):
-    model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(3,224,224)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(64, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(128, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(256, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(ZeroPadding2D((1,1)))
-    model.add(Convolution2D(512, 3, 3, activation='relu'))
-    model.add(MaxPooling2D((2,2), strides=(2,2)))
-
-    model.add(Flatten())
-    model.add(Dense(4096, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(4096, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(1000, activation='relu'))
-
-    if weights_path:
-        model.load_weights(weights_path)
-
-    model.add(Dense(2, activation = 'softmax'))
 
     return model
 
@@ -194,19 +112,13 @@ x_train, y_train, x_test = read_data()
 x_train = preprocess_input(np.float64(x_train), mode = 'caffe')
 x_test = preprocess_input(np.float64(x_test), mode = 'caffe')
 
-# normalize
-#x_train = x_train.astype('float32') / 255.
-#x_test = x_test.astype('float32') / 255.
-
 y_train = to_categorical(y_train, num_classes = 2)
-#y_test = to_categorical(y_test, num_classes = 10)
 
 print(x_train.shape)
 print(y_train.shape)
 
 model = use_base_model(VGG16)
 
-sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 rms = RMSprop(lr=0.002, rho=0.9, epsilon=None, decay=0.001)
 
 model.compile(rms, "categorical_crossentropy")
