@@ -7,7 +7,7 @@ import glob, os
 from keras.preprocessing import image
 
 def get_imgs(img_list):
-    img = [image.load_img(filename, target_size = (160, 120), interpolation = "bilinear") for filename in img_list]
+    img = [image.load_img(filename, target_size = (224, 224), interpolation = "bicubic") for filename in img_list]
     print(len(img))
     npi = [np.array(i) for i in img]
     return np.stack(npi, axis = 0)    

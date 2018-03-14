@@ -14,6 +14,7 @@ from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2
 from keras.optimizers import SGD, RMSprop
 from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
+from keras.applications.imagenet_utils import preprocess_input
 from keras.applications.vgg16 import VGG16
 from keras.applications.inception_v3 import InceptionV3
 import keras.applications as ka
@@ -58,6 +59,7 @@ def use_base_model(base_model_f):
     base_model = base_model_f(weights = 'imagenet', include_top = False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
+    #x = Flatten()(x)
     x = Dense(512, activation = 'relu')(x)
     x = Dropout(0.2)(x)
     x = Dense(64, activation = 'relu')(x)
@@ -70,6 +72,25 @@ def use_base_model(base_model_f):
         layer.trainable = False
 
     return model
+
+def autoencode_with(base_model_f):
+    base_model = base_model_f(weights = 'imagenet', include_top = False)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(512, activation = 'relu')(x)
+    x = Dropout(0.2)(x)
+    encoding = Dense(64, activation = 'relu')(x)
+    x = Dropout(0.2)(encoding)
+    classification = Dense(2, activation = 'softmax')(x)
+
+    model = Model(base_model.input, outputs = x)
+
+    for layer in base_model.layers:
+        layer.trainable = False
+
+    return {
+        "base": base_model }# used to predict outputs 
+
 
 def vgg16():
     base_model = VGG16(weights = 'imagenet', include_top = False)
@@ -168,6 +189,11 @@ def dense():
 #### TRAIN
 x_train, y_train, x_test = read_data()
 
+# preprocess
+# what this does: https://github.com/keras-team/keras/blob/master/keras/applications/imagenet_utils.py#L24
+x_train = preprocess_input(np.float64(x_train), mode = 'caffe')
+x_test = preprocess_input(np.float64(x_test), mode = 'caffe')
+
 # normalize
 #x_train = x_train.astype('float32') / 255.
 #x_test = x_test.astype('float32') / 255.
@@ -204,5 +230,13 @@ write_predictions(preds)
 # VGG16 + 1024 + 128 + 2 (dropout 0.2), nadam, 4 epochs, GPU, loss = 8.5050
 # VGG16 + 1024 + 128 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 8..10 epochs, GPU, loss = 0.0218
 # VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 9..10 epochs, GPU, loss = 1e-7
+# VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = 3e-7
+# pre[caffe] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = 3.8e-7
+# pre[bicubic,220x220,caffe] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = 1e-7
+# pre[caffe] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 0.0218
+# pre[tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = 0.0042
+# pre[tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 6.8e-5
+# pre[tprch] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = 1.5e-6
+# pre[tprch] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 6.1e-6
 # XCeption + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1602
 # InceptionResNetV2 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1539
