@@ -150,3 +150,5 @@ write_predictions(preds)
 # pre[tprch] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 6.1e-6
 # XCeption + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1602
 # InceptionResNetV2 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1539
+# pre[tf] VGG19 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 0.0045
+# pre[bicubic,224x224,tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = loss: 0.0056 (3 missclass)
