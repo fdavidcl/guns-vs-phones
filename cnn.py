@@ -17,10 +17,11 @@ from keras.utils.np_utils import to_categorical
 from keras.applications.imagenet_utils import preprocess_input
 from keras.applications.vgg16 import VGG16
 from keras.applications.inception_v3 import InceptionV3
-import keras.applications as ka
-import numpy as np
+
 from read_data import read_data
 from write_predictions import write_predictions
+from save_model import save_my_model
+from save_model import load_my_model
 
 ### MODELO
 def cnn():
@@ -120,7 +121,7 @@ print(y_train.shape)
 model = use_base_model(VGG16)
 
 # Alternative rmsprop:
-rms = RMSprop(lr=0.002, rho=0.9, epsilon=None, decay=0.001)
+rms = RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0)
 
 model.compile("rmsprop", "categorical_crossentropy")
 model.fit(
@@ -130,8 +131,18 @@ model.fit(
     shuffle = True
 )
 
+# Save model and weights
+save_my_model(model)
+loaded_model = load_my_model()
+
+loaded_model.compile(rms, "categorical_crossentropy")
+
 preds = model.predict(x_test)
+preds_loaded = loaded_model.predict(x_test)
+
 write_predictions(preds)
+write_predictions(preds_loaded, filename = 'output.loaded.csv')
+
 
 # InceptionV3 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.2750
 # VGG16 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.0435
@@ -151,4 +162,4 @@ write_predictions(preds)
 # XCeption + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1602
 # InceptionResNetV2 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1539
 # pre[tf] VGG19 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 0.0045
-# pre[bicubic,224x224,tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = loss: 0.0056 (3 missclass)
+# pre[bicubic,224x224,tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = loss: 0.0056 (3 missclass)\
