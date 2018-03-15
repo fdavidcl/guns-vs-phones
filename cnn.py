@@ -119,18 +119,16 @@ print(y_train.shape)
 
 model = use_base_model(VGG16)
 
+# Alternative rmsprop:
 rms = RMSprop(lr=0.002, rho=0.9, epsilon=None, decay=0.001)
 
-model.compile(rms, "categorical_crossentropy")
+model.compile("rmsprop", "categorical_crossentropy")
 model.fit(
     x_train, y_train,
     batch_size = 16,
     epochs = 10,
     shuffle = True
 )
-
-#preds = model.predict(x_train)
-#print(np.argmax(preds, axis = 1))
 
 preds = model.predict(x_test)
 write_predictions(preds)
