@@ -4,19 +4,20 @@ np.random.seed(1234) # for reproducibility
 
 # https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
 import os
+import argparse
+import logging
 
 os.environ['PYTHONHASHSEED'] = '0'
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
 #os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
-from keras.layers import Conv2D, MaxPooling2D, Dense, Reshape, Flatten, Input, Dropout, GlobalAveragePooling2D
-from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
-from keras.optimizers import SGD, RMSprop
+from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, GlobalAveragePooling2D
+from keras.layers.convolutional import MaxPooling2D
+from keras.optimizers import RMSprop
 from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
 from keras.applications.imagenet_utils import preprocess_input
 from keras.applications.vgg16 import VGG16
-from keras.applications.inception_v3 import InceptionV3
 
 from read_data import read_data
 from write_predictions import write_predictions
@@ -105,44 +106,68 @@ def dense():
 
     return model
 
-#### TRAIN
-x_train, y_train, x_test = read_data()
+def main():
+    logger = logging.getLogger('cnn.py')
+    logging.basicConfig()
+    logger.setLevel(logging.INFO)
+    parser = argparse.ArgumentParser(description='Train or predict if a image is a gun or phone')
+    parser.add_argument('-p','--pretrained',
+                        help='Use an existing trained model',
+                        type=str,
+                        nargs='+',
+                        required=False)
 
-# preprocess
-# what this does: https://github.com/keras-team/keras/blob/master/keras/applications/imagenet_utils.py#L24
-x_train = preprocess_input(np.float64(x_train), mode = 'caffe')
-x_test = preprocess_input(np.float64(x_test), mode = 'caffe')
+    args = parser.parse_args()
+    logger.info(str(args.pretrained))
 
-y_train = to_categorical(y_train, num_classes = 2)
+    #### TRAIN
+    x_train, y_train, x_test = read_data()
+    x_test = preprocess_input(np.float64(x_test), mode = 'caffe')
+    # preprocess
+    # what this does: https://github.com/keras-team/keras/blob/master/keras/applications/imagenet_utils.py#L24
+    x_train = preprocess_input(np.float64(x_train), mode = 'caffe')
+    y_train = to_categorical(y_train, num_classes = 2)
 
-print(x_train.shape)
-print(y_train.shape)
+    # Alternative rmsprop:
+    rms = RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0)
 
-model = use_base_model(VGG16)
+    if args.pretrained:
+        logger.info('using existing model %s...', args.pretrained)
+        model_name = args.pretrained[0]
+        w = args.pretrained[1]
+        model = load_my_model(model = model_name,
+                              weights = w)
+        model.compile(rms, "categorical_crossentropy")
+    else:
+        logger.info('Training a new model...')
 
-# Alternative rmsprop:
-rms = RMSprop(lr=0.001, rho=0.9, epsilon=None, decay=0)
+        model = use_base_model(VGG16)
+        model.compile("rmsprop", "categorical_crossentropy")
+        model.fit(
+            x_train, y_train,
+            batch_size = 1,
+            epochs = 2,
+            shuffle = True
+        )
 
-model.compile("rmsprop", "categorical_crossentropy")
-model.fit(
-    x_train, y_train,
-    batch_size = 16,
-    epochs = 10,
-    shuffle = True
-)
 
-# Save model and weights
-save_my_model(model)
-loaded_model = load_my_model()
 
-loaded_model.compile(rms, "categorical_crossentropy")
+    # Save model and weights
+    if not args.pretrained:
+        save = raw_input("Save model? [y/n]: ")
+        if save == 'y':
+            name = raw_input('Name the model: ')
+            save_my_model(model,
+                          modelname = name,
+                          w = name)
 
-preds = model.predict(x_test)
-preds_loaded = loaded_model.predict(x_test)
+    logger.info('Predicting...')
+    preds = model.predict(x_test)
+    logger.info('Writing predictions...')
+    write_predictions(preds)
 
-write_predictions(preds)
-write_predictions(preds_loaded, filename = 'output.loaded.csv')
-
+if __name__ == '__main__':
+    main()
 
 # InceptionV3 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.2750
 # VGG16 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.0435
