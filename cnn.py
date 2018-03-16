@@ -150,7 +150,10 @@ def main():
             shuffle = True
         )
 
-
+    logger.info('Predicting...')
+    preds = model.predict(x_test)
+    logger.info('Writing predictions...')
+    write_predictions(preds)
 
     # Save model and weights
     if not args.pretrained:
@@ -160,11 +163,6 @@ def main():
             save_my_model(model,
                           modelname = name,
                           w = name)
-
-    logger.info('Predicting...')
-    preds = model.predict(x_test)
-    logger.info('Writing predictions...')
-    write_predictions(preds)
 
 if __name__ == '__main__':
     main()
