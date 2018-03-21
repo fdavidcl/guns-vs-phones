@@ -188,3 +188,6 @@ if __name__ == '__main__':
 # InceptionResNetV2 + 1024 + 128 + 2, adam, 4 epochs, CPU, loss = 0.1539
 # pre[tf] VGG19 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, GPU, loss = 0.0045
 # pre[bicubic,224x224,tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = loss: 0.0056 (3 missclass)\
+# pre[torch] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 7 epochs, CPU, loss = 0.0055 (4 mal clasif)
+# pre[torch] Xception + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 7 epochs, CPU, loss = 0.0359 (+20 mal clasif)
+
