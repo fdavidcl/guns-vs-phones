@@ -18,6 +18,7 @@ from keras.models import Sequential, Model
 from keras.utils.np_utils import to_categorical
 from keras.applications.imagenet_utils import preprocess_input
 from keras.applications.vgg16 import VGG16
+from keras.applications.resnet50 import ResNet50
 
 from read_data import read_data
 from write_predictions import write_predictions
@@ -141,7 +142,7 @@ def main():
     else:
         logger.info('Training a new model...')
 
-        model = use_base_model(VGG16)
+        model = use_base_model(ResNet50)
         model.compile("rmsprop", "categorical_crossentropy")
         model.fit(
             x_train, y_train,
@@ -152,19 +153,21 @@ def main():
 
 
 
-    # Save model and weights
-    if not args.pretrained:
-        save = raw_input("Save model? [y/n]: ")
-        if save == 'y':
-            name = raw_input('Name the model: ')
-            save_my_model(model,
-                          modelname = name,
-                          w = name)
+
 
     logger.info('Predicting...')
     preds = model.predict(x_test)
     logger.info('Writing predictions...')
-    write_predictions(preds)
+    write_predictions(preds,filename="RESNET50.csv")
+
+    # Save model and weights
+    if not args.pretrained:
+        save = input("Save model? [y/n]: ")
+        if save == 'y':
+            name = input('Name the model: ')
+            save_my_model(model,
+                          modelname = name,
+                          w = name)
 
 if __name__ == '__main__':
     main()
@@ -190,4 +193,6 @@ if __name__ == '__main__':
 # pre[bicubic,224x224,tf] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.001 decay=0, 10 epochs, GPU, loss = loss: 0.0056 (3 missclass)\
 # pre[torch] VGG16 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 7 epochs, CPU, loss = 0.0055 (4 mal clasif)
 # pre[torch] Xception + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 7 epochs, CPU, loss = 0.0359 (+20 mal clasif)
+# pre[caffe] ResNet50 + 512 + 64 + 2 (dropout 0.2), rmsprop lr=0.002 decay=0.001, 10 epochs, CPU, loss = loss: 0.1252 (1 mal clasif)
+
 
