@@ -4,8 +4,6 @@ np.random.seed(1234) # for reproducibility
 
 # https://keras.io/getting-started/faq/#how-can-i-obtain-reproducible-results-using-keras-during-development
 import os
-import argparse
-import logging
 
 os.environ['PYTHONHASHSEED'] = '0'
 #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
@@ -20,43 +18,15 @@ from keras.applications.imagenet_utils import preprocess_input
 from keras.applications.vgg16 import VGG16
 from keras.applications.resnet50 import ResNet50
 
+import argparse
+import logging
+
 from read_data import read_data
 from write_predictions import write_predictions
 from save_model import save_my_model
 from save_model import load_my_model
 
 ### MODELO
-def cnn():
-    model = Sequential()
-
-    #model.add(Reshape((28, 28, 1), input_shape = (28, 28)))
-    model.add(Conv2D(
-        input_shape = (200, 200, 3)
-        , filters = 32
-        , kernel_size = (3, 3)
-        , padding = "same"
-        , activation = "relu"
-    ))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(
-        filters = 64
-        , kernel_size = (3, 3)
-        , padding = "same"
-        , activation = "relu"
-    ))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(
-        filters = 128
-        , kernel_size = (3, 3)
-        , padding = "same"
-        , activation = "relu"
-    ))
-    model.add(Flatten())
-    model.add(Dense(2048))
-    model.add(Dense(100))
-    model.add(Dense(2, activation = "softmax"))
-
-    return model
 
 def use_base_model(base_model_f):
     base_model = base_model_f(weights = 'imagenet', include_top = False)
@@ -76,36 +46,7 @@ def use_base_model(base_model_f):
 
     return model
 
-def vgg16():
-    base_model = VGG16(weights = 'imagenet', include_top = False)
-    x = base_model.output
-    x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation = 'relu')(x)
-    x = Dropout(0.1)(x)
-    x = Dense(128, activation = 'relu')(x)
-    x = Dropout(0.1)(x)
-    x = Dense(2, activation = 'softmax')(x)
-
-    model = Model(base_model.input, outputs = x)
-
-    for layer in base_model.layers:
-        layer.trainable = False
-
-    return model
-
-
-def dense():
-    model = Sequential()
-    model.add(Flatten(input_shape = (160, 120, 3)))
-    model.add(Dense(5000, activation = "relu"))
-    model.add(Dropout(0.1))
-    model.add(Dense(500))
-    model.add(Dropout(0.1))
-    model.add(Dense(50))
-    model.add(Dropout(0.1))
-    model.add(Dense(2, activation = "softmax"))
-
-    return model
+### SCRIPT
 
 def main():
     logger = logging.getLogger('cnn.py')
@@ -151,7 +92,10 @@ def main():
             shuffle = True
         )
 
-
+    logger.info('Predicting...')
+    preds = model.predict(x_test)
+    logger.info('Writing predictions...')
+    write_predictions(preds)
 
 
 
