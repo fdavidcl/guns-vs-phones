@@ -33,13 +33,21 @@ Hablar de **transfer learning**.
 
 ## Resultados
 
+El primer paso para desarrollar el trabajo fue cómo leer los datos, se decidió redimensionarlas todas a un tamaño de 224x224 y con una interpolación bicúbica, ya que fue la interpolación con mejores resultados. Una vez leidas las imágenes, se les aplicó un procesamiento usando _caffe_. Este preprocesamiento convierte primero las imágenes de RGB a BGR, luego centra cada canal de color en el cero con respecto al conjunto de datos ImageNet, sin realizar ningún escalado. Hay dos tipos más de preprocesamiento, _tf, torch_, pero _caffe_ dio mejores resultados.
+
+En cuanto a los modelos, el mejor ha sido VGG16 con tres capas y 10 epochs: La capa de entrada densa con 512 neuronas, una capa oculta densa de 64 neuronas y una de salida con dos neuronas. La función de activación en las dos primeras es relu, mientras que la final es softmax. Los pesos usados, como se comentó en el párrafo anterior han sido los de ImageNet.
+
+También se probó con ResNet50, dejando la misma arquitectura para la red que en VGG16 (512+64+2) y 10 epochs, obteniendo resultados ligeramente peores (1 Instacia mal clasificada).
+
+El último modelo competitivo probado fue VGG19, con una estructura 1024 + 128 + 2 y 4 epochs, obteniendo resultados muy buenos (99%), incluso bajando el número de epochs a 3 se obtienen resultados del 99%.
+
 | Pre                   | Modelo            | Dout | lr   | decay | epochs | loss      |   Pri  |   Púb  |
 |-----------------------|-------------------|------|------|-------|--------|-----------|:------:|:------:|
 | bicubic,224x224,caffe | VGG16+512+64+2    | .2   | .001 | 0     | 10     | $10^{-7}$ |    1   |    1   |
-| bicubic,220x220,caffe | VGG16+512+64+2    | .2   | .001 | 0     | 10     | $10^{-7}$ |    1   |    1   |
-| caffe                 | ResNet50+512+64+2 | .2   | .002 | .001  | 10     | .1252     |    1   | .99749 |
-| bicubic,220x220,caffe | VGG16+512+64+2    | .2   | .001 | 0     | 10     | $10^{-7}$ |    1   | .99248 |
-|                       | VGG19+1024+128+2  | .2   | def. | def.  | 4      | .1093     | .99250 | .99498 |
+| bicubic,224x224,caffe | VGG16+512+64+2    | .2   | .001 | 0     | 10     | $10^{-7}$ |    1   |    1   |
+| bicubic,224x224,caffe | ResNet50+512+64+2 | .2   | .002 | .001  | 10     | .1252     |    1   | .99749 |
+| bicubic,224x224,caffe | VGG19+1024+128+2  | .2   | def. | def.  | 4      | .1093     | .99250 | .99498 |
+| bicubic,224x224,caffe | VGG19+1024+128+2  | .2   | def. | def.  | 3      | .0611     | .99500 | .99498 |
 
 ## Otros modelos probados
 Además de VGG16, se han entrenado y evaluado otros modelos con pesos pre-entrenados para Imagenet disponibles en Keras, como son
