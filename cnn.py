@@ -83,7 +83,7 @@ def main():
     else:
         logger.info('Training a new model...')
 
-        model = use_base_model(ResNet50)
+        model = use_base_model(VGG16)
         model.compile("rmsprop", "categorical_crossentropy")
         model.fit(
             x_train, y_train,
@@ -106,8 +106,10 @@ def main():
 
     # Save model and weights
     if not args.pretrained:
+	# raw_input (python 2.7)
         save = input("Save model? [y/n]: ")
         if save == 'y':
+	# raw_input (python 2.7)
             name = input('Name the model: ')
             save_my_model(model,
                           modelname = name,

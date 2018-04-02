@@ -32,10 +32,10 @@ Hablar de **transfer learning**.
 
 ## Otros modelos probados
 
-VGG19, InceptionV3, ResNet50
+VGG19, InceptionV3, ResNet50, InceptionResNetV2, XCeption
 
 # Distribución del trabajo
 
 - Búsqueda y recopilación de información: Cristina Heredia
 - Desarrollo del código Python: Alejandro Alcalde y David Charte
-- Experimentación con diversos parámetros: Cristina Heredia, Alejandro Alcalde, David Charte
+- Experimentación con diversos parámetros y modelos: Cristina Heredia, Alejandro Alcalde, David Charte
