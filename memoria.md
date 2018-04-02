@@ -42,9 +42,9 @@ Hablar de **transfer learning**.
 |                       | VGG19+1024+128+2  | .2   | def. | def.  | 4      | .1093     | .99250 | .99498 |
 
 ## Otros modelos probados
-
-VGG19, InceptionV3, ResNet50, InceptionResNetV2, XCeption
-
+Además de VGG16, se han entrenado y evaluado otros modelos con pesos pre-entrenados para Imagenet disponibles en Keras, como son
+VGG19, InceptionV3, ResNet50, InceptionResNetV2 y XCeption. A pesar de que para el dataset de Imagenet el modelo Xception obtuvo la mayor tasa de acierto, en nuestro ejemplo obtuvo malos resultados, clasificando erróneamente más de 20 instancias. Esto puede deberse a que en este trabajo no se han configurado 22,910,480 parámetros ni se ha llevado el modelo Xception a un nivel de profundidad de 126, como se hizo para Imagenet, maximizando el rendimiento del clasificador. Los modelos VGG16 y VGG19 dieron ambos buenos resultados en este problema como también sucedió en la competición de Imagenet, siendo VGG16 el mejor de los modelos probados en nuestro experimento. Ambos modelos cuentan con que no necesitan de un nivel de profundidad muy elevado para dar buenos resultados. Las experimentaciones con ResNet50 demuestran que, para estos datos, el modelo puede dar muy buenos resultados con un preprocesamiento como caffe, una estructura de 512 + 64 + 2, el optimizador rmsprop y un número alto de epochs (10), pero que sin embargo puede dar malos resultados sin preprocesamiento, una estructura (1024 + 128 + 2), el optimizador adam y un número bajo de epochs (4). Los modelos InceptionV3 e InceptionResNetV2 fueron entrenados con la estructura (1024 + 128 + 2) usando el optimizador adam y 4 epochs, pero en ningún caso produjeron resultados significativos.
+ 
 # Distribución del trabajo
 
 - Búsqueda y recopilación de información: Cristina Heredia
