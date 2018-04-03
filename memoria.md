@@ -21,7 +21,7 @@ lang: es
 
 La actividad consiste en participar en la competición de Kaggle [pistolas vs smartphones](https://www.kaggle.com/c/pistolas-vs-smartphones-con-deep-learning/leaderboard) por grupos, donde el problema a resolver es implementar un modelo de Deep Learning para clasificar en dos clases diversas imágenes de pistolas y smartphones con la mayor tasa de acierto posible. 
 
-La competición consta de 743 instancias para entrenamiento sin etiquetar y 799 instancias para test.
+La competición consta de 743 instancias para entrenamiento y 799 instancias para test sin etiquetar.
 
 
 \begin{figure}[htbp]
